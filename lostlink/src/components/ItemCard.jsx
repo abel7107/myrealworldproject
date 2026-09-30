@@ -1,10 +1,19 @@
-function ItemCard({ title, type, location, date }) {
+function ItemCard({
+  title,
+  type,
+  category,
+  location,
+  date,
+  onView,
+}) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900">
 
       {/* Image placeholder */}
       <div className="flex h-48 items-center justify-center bg-gray-800">
-        <span className="text-5xl">📦</span>
+        <span className="text-5xl">
+          {type === "Lost" ? "🔍" : "🤝"}
+        </span>
       </div>
 
       {/* Content */}
@@ -15,22 +24,34 @@ function ItemCard({ title, type, location, date }) {
             {title}
           </h3>
 
-          <span className="rounded-full bg-red-500/10 px-3 py-1 text-sm text-red-400">
-            {type}
-          </span>
+          <span
+              className={`rounded-full px-3 py-1 text-sm ${
+                type === "Lost"
+                  ? "bg-red-500/10 text-red-400"
+                  : "bg-green-500/10 text-green-400"
+              }`}
+            >
+              {type}
+            </span>
         </div>
 
         <p className="text-sm text-gray-400">
           📍 {location}
+        </p>
+        <p className="mt-2 text-sm text-gray-500">
+          🏷️ {category}
         </p>
 
         <p className="mt-2 text-sm text-gray-500">
           📅 {date}
         </p>
 
-        <button className="mt-5 w-full rounded-lg bg-blue-600 py-2.5 font-medium text-white transition hover:bg-blue-700">
-          View Item
-        </button>
+        <button
+            onClick={onView}
+            className="mt-5 w-full rounded-lg bg-blue-600 py-2.5 font-medium text-white transition hover:bg-blue-700"
+          >
+            View Item
+          </button>
 
       </div>
     </div>

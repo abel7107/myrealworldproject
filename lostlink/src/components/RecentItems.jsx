@@ -28,8 +28,10 @@ function RecentItems() {
               key={item.id}
               title={item.title}
               type={item.type}
+              category={item.category}
               location={item.location}
               date={item.date}
+              onView={() => console.log("Viewing item:", item.id)}
             />
           ))}
 

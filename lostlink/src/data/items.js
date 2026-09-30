@@ -23,14 +23,14 @@ const items = [
     date: "September 28, 2026",
   },
   {
-    id: 3,
+    id: 4,
     title: "student ID Card",
     type: "Lost",
     location: "Dire Dawa",
     date: "September 27, 2026",
   },
   {
-    id: 3,
+    id: 5,
     title: "Black Wallet",
     type: "Lost",
     location: "Dire Dawa",
