@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ItemType {
+  LOST
+  FOUND
+}
+
+enum ItemStatus {
+  PENDING
+  ACTIVE
+  RESOLVED
+  REMOVED
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(USER)
+  phone         String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  items         Item[]
+  reports       Report[]
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages   Message[] @relation("ReceivedMessages")
+}
+
+model Category {
+  id            Int       @id @default(autoincrement())
+  name          String    @unique
+  items         Item[]
+}
+
+model Item {
+  id            Int         @id @default(autoincrement())
+  title         String
+  description   String?
+  type          ItemType
+  location      String
+  dateLostOrFound DateTime?
+  imageUrl      String?
+  status        ItemStatus  @default(PENDING)
+  ownerId       Int
+  owner         User        @relation(fields: [ownerId], references: [id])
+  categoryId    Int
+  category      Category    @relation(fields: [categoryId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  reports       Report[]
+  messages      Message[]
+}
+
+model Report {
+  id            Int         @id @default(autoincrement())
+  reason        String
+  description   String?
+  status        ReportStatus @default(PENDING)
+  reporterId    Int
+  reporter      User        @relation(fields: [reporterId], references: [id])
+  itemId        Int
+  item          Item        @relation(fields: [itemId], references: [id])
+  createdAt     DateTime    @default(now())
+  resolvedAt    DateTime?
+}
+
+model Message {
+  id            Int       @id @default(autoincrement())
+  content       String
+  isRead        Boolean   @default(false)
+  senderId      Int
+  sender        User      @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId    Int
+  receiver      User      @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  itemId        Int
+  item          Item      @relation(fields: [itemId], references: [id])
+  createdAt     DateTime  @default(now())
+}
