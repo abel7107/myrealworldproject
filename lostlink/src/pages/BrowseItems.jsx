@@ -19,7 +19,7 @@ function BrowseItems() {
     return items.filter((item) => {
       const matchesSearch =
         item.title.toLowerCase().includes(search.toLowerCase()) ||
-        item.category.toLowerCase().includes(search.toLowerCase());
+        item.category?.toLowerCase().includes(search.toLowerCase());
       const matchesType =
         filterType === "all" || item.type.toLowerCase() === filterType;
       const matchesLocation =

@@ -26,7 +26,9 @@ function ItemCard({ id, title, type, category, location, date }) {
         </div>
 
         <p className="text-sm text-gray-400">📍 {location}</p>
-        <p className="mt-2 text-sm text-gray-500">🏷️ {category}</p>
+        <p className="mt-2 text-sm text-gray-500">
+          🏷️ {category || "Uncategorized"}
+        </p>
         <p className="mt-2 text-sm text-gray-500">📅 {date}</p>
 
         <Link
