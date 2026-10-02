@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useItems } from "../context/ItemsContext";
 
@@ -6,7 +7,34 @@ function ItemDetail() {
   const navigate = useNavigate();
   const { getItem } = useItems();
 
-  const item = getItem(id);
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getItem(id)
+      .then((data) => {
+        if (!cancelled) setItem(data);
+      })
+      .catch(() => {
+        if (!cancelled) setItem(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, getItem]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[80vh] items-center justify-center bg-gray-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!item) {
     return (

@@ -1,0 +1,74 @@
+const API_BASE = "/api";
+
+const TOKEN_KEY = "lostlink_token";
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setToken(token) {
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+}
+
+async function request(path, { method = "GET", body, params } = {}) {
+  const url = new URL(API_BASE + path, window.location.origin);
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        url.searchParams.set(key, value);
+      }
+    });
+  }
+
+  const headers = { "Content-Type": "application/json" };
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(url.pathname + url.search, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.message || `Request failed (${res.status})`);
+  }
+
+  return data;
+}
+
+export const api = {
+  // Auth
+  login: (email, password) =>
+    request("/auth/login", { method: "POST", body: { email, password } }),
+  register: (name, email, password) =>
+    request("/auth/register", { method: "POST", body: { name, email, password } }),
+  getMe: () => request("/auth/me"),
+
+  // Items
+  getItems: (params) => request("/items", { params }),
+  getItem: (id) => request(`/items/${id}`),
+  createItem: (item) => request("/items", { method: "POST", body: item }),
+  updateItem: (id, item) =>
+    request(`/items/${id}`, { method: "PUT", body: item }),
+  deleteItem: (id) => request(`/items/${id}`, { method: "DELETE" }),
+
+  // Users
+  updateMe: (updates) => request("/users/me", { method: "PUT", body: updates }),
+
+  // Admin
+  getUsers: () => request("/admin/users"),
+  getUser: (id) => request(`/admin/users/${id}`),
+  updateUserStatus: (id, isActive) =>
+    request(`/admin/users/${id}/status`, { method: "PUT", body: { isActive } }),
+  getAdminItems: () => request("/admin/items"),
+  getStats: () => request("/admin/stats"),
+};

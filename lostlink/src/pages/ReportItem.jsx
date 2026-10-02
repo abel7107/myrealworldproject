@@ -20,6 +20,8 @@ function ReportItem() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     setForm((prev) => ({
@@ -33,11 +35,19 @@ function ReportItem() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addItem(form);
-    setSubmitted(true);
-    setTimeout(() => navigate("/items"), 2000);
+    setError("");
+    setSubmitting(true);
+    try {
+      await addItem(form);
+      setSubmitted(true);
+      setTimeout(() => navigate("/items"), 2000);
+    } catch (err) {
+      setError(err.message || "Failed to submit the report. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -75,6 +85,12 @@ function ReportItem() {
           onSubmit={handleSubmit}
           className="rounded-2xl border border-gray-800 bg-gray-900 p-8"
         >
+          {error && (
+            <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
           {/* Item Title */}
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-gray-300">
@@ -223,9 +239,10 @@ function ReportItem() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full rounded-xl bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
+            disabled={submitting}
+            className="w-full rounded-xl bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
           >
-            Submit Report
+            {submitting ? "Submitting..." : "Submit Report"}
           </button>
         </form>
       </div>

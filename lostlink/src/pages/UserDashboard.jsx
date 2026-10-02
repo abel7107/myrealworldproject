@@ -6,8 +6,7 @@ function UserDashboard() {
   const { user } = useAuth();
   const { items } = useItems();
 
-  // For now, show all items as "your items" — will filter by owner when backend is connected
-  const myItems = items.slice(0, 4);
+  const myItems = items.filter((i) => i.ownerId === user?.id).slice(0, 4);
   const lostCount = myItems.filter((i) => i.type === "Lost").length;
   const foundCount = myItems.filter((i) => i.type === "Found").length;
 

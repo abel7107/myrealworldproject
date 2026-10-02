@@ -1,0 +1,16 @@
+{
+  "name": "lostlink-fullstack",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm --prefix lostlink run dev\" \"npm --prefix lostlink/server run dev\"",
+    "dev:client": "npm --prefix lostlink run dev",
+    "dev:server": "npm --prefix lostlink/server run dev",
+    "build": "npm --prefix lostlink run build",
+    "db:generate": "npm --prefix lostlink/server run db:generate",
+    "db:push": "npm --prefix lostlink/server run db:push",
+    "db:seed": "npm --prefix lostlink/server run db:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

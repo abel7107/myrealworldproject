@@ -1,11 +1,21 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useItems } from "../context/ItemsContext";
+import { api } from "../api/client";
 
 function AdminDashboard() {
   const { items } = useItems();
+  const [stats, setStats] = useState(null);
 
   const lostCount = items.filter((i) => i.type === "Lost").length;
   const foundCount = items.filter((i) => i.type === "Found").length;
+
+  useEffect(() => {
+    api
+      .getStats()
+      .then(({ data }) => setStats(data))
+      .catch(() => setStats(null));
+  }, []);
 
   return (
     <section className="bg-gray-950 px-6 py-16">
@@ -20,19 +30,27 @@ function AdminDashboard() {
         <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
             <p className="text-sm text-gray-500">Total Users</p>
-            <p className="mt-2 text-3xl font-bold text-white">2</p>
+            <p className="mt-2 text-3xl font-bold text-white">
+              {stats ? stats.totalUsers : "…"}
+            </p>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
             <p className="text-sm text-gray-500">Total Items</p>
-            <p className="mt-2 text-3xl font-bold text-white">{items.length}</p>
+            <p className="mt-2 text-3xl font-bold text-white">
+              {stats ? stats.totalItems : items.length}
+            </p>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
             <p className="text-sm text-gray-500">Lost Items</p>
-            <p className="mt-2 text-3xl font-bold text-red-400">{lostCount}</p>
+            <p className="mt-2 text-3xl font-bold text-red-400">
+              {stats ? stats.lostItems : lostCount}
+            </p>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6">
             <p className="text-sm text-gray-500">Found Items</p>
-            <p className="mt-2 text-3xl font-bold text-green-400">{foundCount}</p>
+            <p className="mt-2 text-3xl font-bold text-green-400">
+              {stats ? stats.foundItems : foundCount}
+            </p>
           </div>
         </div>
 

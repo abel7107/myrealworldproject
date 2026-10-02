@@ -1,26 +1,22 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
+import prisma from '../config/database.js';
 
-// Temporary in-memory store — will be replaced by database
-const users = [
-  {
-    id: 1,
-    name: 'Admin User',
-    email: 'admin@lostlink.com',
-    passwordHash: '$2b$10$placeholder', // will be replaced with real hash
-    role: 'ADMIN',
-    phone: '+251911000000',
-    isActive: true,
-    createdAt: new Date(),
-  },
-];
+const publicUser = (user) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  phone: user.phone,
+  isActive: user.isActive,
+  createdAt: user.createdAt,
+});
 
 export async function register(req, res, next) {
   try {
     const { name, email, password } = req.body;
 
-    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -35,8 +31,7 @@ export async function register(req, res, next) {
       });
     }
 
-    // Check if email exists
-    const exists = users.find((u) => u.email === email);
+    const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
       return res.status(400).json({
         success: false,
@@ -44,24 +39,13 @@ export async function register(req, res, next) {
       });
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user — always role USER
-    const newUser = {
-      id: users.length + 1,
-      name,
-      email,
-      passwordHash,
-      role: 'USER',
-      phone: '',
-      isActive: true,
-      createdAt: new Date(),
-    };
+    // Always role USER — never ADMIN
+    const newUser = await prisma.user.create({
+      data: { name, email, passwordHash, role: 'USER', phone: '' },
+    });
 
-    users.push(newUser);
-
-    // Generate JWT
     const token = jwt.sign(
       { userId: newUser.id, role: newUser.role },
       config.jwtSecret,
@@ -71,10 +55,7 @@ export async function register(req, res, next) {
     res.status(201).json({
       success: true,
       message: 'Registration successful',
-      data: {
-        user: { id: newUser.id, name, email, role: newUser.role },
-        token,
-      },
+      data: { user: publicUser(newUser), token },
     });
   } catch (error) {
     next(error);
@@ -92,7 +73,7 @@ export async function login(req, res, next) {
       });
     }
 
-    const user = users.find((u) => u.email === email);
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -124,10 +105,7 @@ export async function login(req, res, next) {
     res.json({
       success: true,
       message: 'Login successful',
-      data: {
-        user: { id: user.id, name: user.name, email: user.email, role: user.role },
-        token,
-      },
+      data: { user: publicUser(user), token },
     });
   } catch (error) {
     next(error);
@@ -136,7 +114,9 @@ export async function login(req, res, next) {
 
 export async function getMe(req, res, next) {
   try {
-    const user = users.find((u) => u.id === req.user.userId);
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+    });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -144,18 +124,7 @@ export async function getMe(req, res, next) {
       });
     }
 
-    res.json({
-      success: true,
-      data: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone,
-        isActive: user.isActive,
-        createdAt: user.createdAt,
-      },
-    });
+    res.json({ success: true, data: publicUser(user) });
   } catch (error) {
     next(error);
   }

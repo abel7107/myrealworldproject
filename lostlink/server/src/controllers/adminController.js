@@ -1,24 +1,37 @@
-// Temporary — will use database
-const users = [
-  { id: 1, name: 'Admin User', email: 'admin@lostlink.com', role: 'ADMIN', phone: '+251911000000', isActive: true },
-  { id: 2, name: 'Abebe Kebede', email: 'abebe@example.com', role: 'USER', phone: '+251911111111', isActive: true },
-];
-
-const items = [
-  { id: 1, title: 'iPhone 13', type: 'LOST', status: 'ACTIVE', ownerId: 2 },
-  { id: 2, title: 'Black Backpack', type: 'FOUND', status: 'ACTIVE', ownerId: 2 },
-  { id: 3, title: 'Car Keys', type: 'LOST', status: 'ACTIVE', ownerId: 2 },
-];
+import prisma from '../config/database.js';
 
 export async function getUsers(req, res, next) {
   try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true,
+        isActive: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
     res.json({ success: true, data: users });
   } catch (error) { next(error); }
 }
 
 export async function getUser(req, res, next) {
   try {
-    const user = users.find(u => u.id === Number(req.params.id));
+    const user = await prisma.user.findUnique({
+      where: { id: Number(req.params.id) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, data: user });
   } catch (error) { next(error); }
@@ -26,32 +39,52 @@ export async function getUser(req, res, next) {
 
 export async function updateUserStatus(req, res, next) {
   try {
-    const user = users.find(u => u.id === Number(req.params.id));
+    const user = await prisma.user.findUnique({ where: { id: Number(req.params.id) } });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
     const { isActive } = req.body;
-    user.isActive = isActive;
-    res.json({ success: true, message: 'User status updated', data: user });
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: { isActive },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+    res.json({ success: true, message: 'User status updated', data: updated });
   } catch (error) { next(error); }
 }
 
 export async function getItems(req, res, next) {
   try {
+    const items = await prisma.item.findMany({
+      include: { category: true, owner: { select: { id: true, name: true, email: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
     res.json({ success: true, data: items });
   } catch (error) { next(error); }
 }
 
 export async function getStats(req, res, next) {
   try {
+    const [totalUsers, totalItems, lostItems, foundItems, pendingItems, resolvedItems] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.item.count(),
+        prisma.item.count({ where: { type: 'LOST' } }),
+        prisma.item.count({ where: { type: 'FOUND' } }),
+        prisma.item.count({ where: { status: 'PENDING' } }),
+        prisma.item.count({ where: { status: 'RESOLVED' } }),
+      ]);
+
     res.json({
       success: true,
-      data: {
-        totalUsers: users.length,
-        totalItems: items.length,
-        lostItems: items.filter(i => i.type === 'LOST').length,
-        foundItems: items.filter(i => i.type === 'FOUND').length,
-        pendingItems: items.filter(i => i.status === 'PENDING').length,
-        resolvedItems: items.filter(i => i.status === 'RESOLVED').length,
-      },
+      data: { totalUsers, totalItems, lostItems, foundItems, pendingItems, resolvedItems },
     });
   } catch (error) { next(error); }
 }
