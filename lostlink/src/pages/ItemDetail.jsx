@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useItems } from "../context/ItemsContext";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../api/client";
 
 function ItemDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getItem } = useItems();
+  const { isAuthenticated } = useAuth();
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportForm, setReportForm] = useState({ reason: "", description: "" });
+  const [reportMsg, setReportMsg] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -127,6 +133,66 @@ function ItemDetail() {
                 </p>
               </div>
             )}
+
+            {/* Report this item */}
+            <div className="mt-6">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => setReportOpen((v) => !v)}
+                  className="text-sm text-gray-500 transition hover:text-red-400"
+                >
+                  🚩 Report this item
+                </button>
+              ) : (
+                <Link to="/login" className="text-sm text-gray-500 hover:text-gray-400">
+                  Log in to report this item
+                </Link>
+              )}
+              {reportMsg && (
+                <p className="mt-2 text-sm text-gray-400">{reportMsg}</p>
+              )}
+              {reportOpen && (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setReportMsg("");
+                    try {
+                      await api.reportItem(id, reportForm);
+                      setReportMsg("Report submitted. Thank you.");
+                      setReportOpen(false);
+                      setReportForm({ reason: "", description: "" });
+                    } catch (err) {
+                      setReportMsg(err.message || "Failed to submit report.");
+                    }
+                  }}
+                  className="mt-4 grid gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4"
+                >
+                  <select
+                    required
+                    value={reportForm.reason}
+                    onChange={(e) => setReportForm((p) => ({ ...p, reason: e.target.value }))}
+                    className="rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
+                  >
+                    <option value="">Select a reason</option>
+                    <option value="Spam">Spam</option>
+                    <option value="Inappropriate">Inappropriate content</option>
+                    <option value="Scam">Scam or fraud</option>
+                    <option value="Duplicate">Duplicate post</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <textarea
+                    rows={3}
+                    placeholder="Details (optional)"
+                    value={reportForm.description}
+                    onChange={(e) => setReportForm((p) => ({ ...p, description: e.target.value }))}
+                    className="resize-none rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
+                  />
+                  <button className="rounded-xl bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700">
+                    Submit Report
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </div>

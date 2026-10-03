@@ -70,6 +70,26 @@ export async function getItems(req, res, next) {
   } catch (error) { next(error); }
 }
 
+export async function updateItemStatus(req, res, next) {
+  try {
+    const { status } = req.body;
+    const allowed = ['PENDING', 'ACTIVE', 'RESOLVED', 'REMOVED'];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
+    const updated = await prisma.item.update({
+      where: { id: Number(req.params.id) },
+      data: { status },
+    });
+    res.json({ success: true, message: 'Item status updated', data: updated });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+    next(error);
+  }
+}
+
 export async function getStats(req, res, next) {
   try {
     const [totalUsers, totalItems, lostItems, foundItems, pendingItems, resolvedItems] =

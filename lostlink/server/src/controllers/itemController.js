@@ -8,6 +8,9 @@ export async function getItems(req, res, next) {
 
     const where = {};
 
+    // Hide removed items from the public listing
+    where.status = { not: 'REMOVED' };
+
     if (search) {
       where.OR = [
         { title: { contains: search } },
@@ -124,7 +127,11 @@ export async function deleteItem(req, res, next) {
     if (item.ownerId !== req.user.userId && req.user.role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
-    await prisma.item.delete({ where: { id: item.id } });
+    await prisma.$transaction([
+      prisma.report.deleteMany({ where: { itemId: item.id } }),
+      prisma.message.deleteMany({ where: { itemId: item.id } }),
+      prisma.item.delete({ where: { id: item.id } }),
+    ]);
     res.json({ success: true, message: 'Item deleted' });
   } catch (error) {
     next(error);

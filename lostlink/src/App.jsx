@@ -9,6 +9,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminItems from "./pages/AdminItems";
+import AdminReports from "./pages/AdminReports";
+import EditItem from "./pages/EditItem";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -20,6 +24,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/items" element={<BrowseItems />} />
         <Route path="/item/:id" element={<ItemDetail />} />
+        <Route path="/item/:id/edit" element={<ProtectedRoute><EditItem /></ProtectedRoute>} />
         <Route path="/report" element={<ProtectedRoute><ReportItem /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -47,7 +52,7 @@ function App() {
           path="/admin/users"
           element={
             <ProtectedRoute requireAdmin>
-              <AdminDashboard />
+              <AdminUsers />
             </ProtectedRoute>
           }
         />
@@ -55,7 +60,7 @@ function App() {
           path="/admin/items"
           element={
             <ProtectedRoute requireAdmin>
-              <AdminDashboard />
+              <AdminItems />
             </ProtectedRoute>
           }
         />
@@ -63,7 +68,7 @@ function App() {
           path="/admin/reports"
           element={
             <ProtectedRoute requireAdmin>
-              <AdminDashboard />
+              <AdminReports />
             </ProtectedRoute>
           }
         />

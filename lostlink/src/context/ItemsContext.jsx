@@ -52,12 +52,26 @@ export function ItemsProvider({ children }) {
     return data;
   };
 
+  const updateItem = async (id, updates) => {
+    const { data } = await api.updateItem(id, updates);
+    const normalized = normalizeItem(data);
+    setItems((prev) =>
+      prev.map((item) => (String(item.id) === String(id) ? normalized : item))
+    );
+    return data;
+  };
+
+  const deleteItem = async (id) => {
+    await api.deleteItem(id);
+    setItems((prev) => prev.filter((item) => String(item.id) !== String(id)));
+  };
+
   const getItem = async (id) => {
     const { data } = await api.getItem(id);
     return normalizeItem(data);
   };
 
-  const value = { items, loading, addItem, getItem, refresh };
+  const value = { items, loading, addItem, updateItem, deleteItem, getItem, refresh };
 
   return <ItemsContext.Provider value={value}>{children}</ItemsContext.Provider>;
 }

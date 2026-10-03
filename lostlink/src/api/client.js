@@ -61,6 +61,9 @@ export const api = {
     request(`/items/${id}`, { method: "PUT", body: item }),
   deleteItem: (id) => request(`/items/${id}`, { method: "DELETE" }),
 
+  reportItem: (id, payload) =>
+    request(`/items/${id}/report`, { method: "POST", body: payload }),
+
   // Users
   updateMe: (updates) => request("/users/me", { method: "PUT", body: updates }),
 
@@ -70,5 +73,10 @@ export const api = {
   updateUserStatus: (id, isActive) =>
     request(`/admin/users/${id}/status`, { method: "PUT", body: { isActive } }),
   getAdminItems: () => request("/admin/items"),
+  updateAdminItemStatus: (id, status) =>
+    request(`/admin/items/${id}/status`, { method: "PUT", body: { status } }),
   getStats: () => request("/admin/stats"),
+  getReports: () => request("/admin/reports"),
+  updateReport: (id, status) =>
+    request(`/admin/reports/${id}`, { method: "PUT", body: { status } }),
 };
