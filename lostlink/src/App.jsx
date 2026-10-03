@@ -8,6 +8,7 @@ import ItemDetail from "./pages/ItemDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
+import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminItems from "./pages/AdminItems";
@@ -35,6 +36,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

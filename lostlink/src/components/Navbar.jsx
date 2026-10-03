@@ -65,6 +65,12 @@ function Navbar() {
               >
                 {user?.name?.split(" ")[0]}
               </Link>
+              <Link
+                to="/profile"
+                className="rounded-lg px-4 py-2 text-gray-300 transition hover:text-white"
+              >
+                Profile
+              </Link>
               <button
                 onClick={handleLogout}
                 className="rounded-lg border border-gray-700 px-4 py-2 text-gray-300 transition hover:text-white"

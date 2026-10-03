@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useItems } from "../context/ItemsContext";
 
@@ -22,14 +22,6 @@ function ReportItem() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    setForm((prev) => ({
-      ...prev,
-      type:
-        preselectedType.charAt(0).toUpperCase() + preselectedType.slice(1),
-    }));
-  }, [preselectedType]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

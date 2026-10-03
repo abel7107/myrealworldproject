@@ -18,7 +18,6 @@ function ItemDetail() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     getItem(id)
       .then((data) => {
         if (!cancelled) setItem(data);
