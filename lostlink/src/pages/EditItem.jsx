@@ -12,6 +12,8 @@ function EditItem() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +34,7 @@ function EditItem() {
           contactName: item.contactName || "",
           contactPhone: item.contactPhone || "",
         });
+        if (item.imageUrl) setPreview(item.imageUrl);
       })
       .catch(() => setError("Failed to load item."))
       .finally(() => !cancelled && setLoading(false));
@@ -49,7 +52,14 @@ function EditItem() {
     setError("");
     setSubmitting(true);
     try {
-      await updateItem(id, form);
+      if (imageFile) {
+        const fd = new FormData();
+        Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+        fd.append("image", imageFile);
+        await updateItem(id, fd);
+      } else {
+        await updateItem(id, form);
+      }
       navigate("/dashboard");
     } catch (err) {
       setError(err.message || "Failed to update item.");
@@ -157,6 +167,23 @@ function EditItem() {
             <label className="mb-2 block text-sm font-medium text-gray-300">Phone Number</label>
             <input type="tel" name="contactPhone" value={form.contactPhone} onChange={handleChange}
               className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500" />
+          </div>
+
+          <div className="mb-8">
+            <label className="mb-2 block text-sm font-medium text-gray-300">Photo</label>
+            {preview && (
+              <img src={preview} alt="Preview" className="mb-3 h-40 w-full rounded-xl object-cover" />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setImageFile(file);
+                setPreview(file ? URL.createObjectURL(file) : preview);
+              }}
+              className="w-full text-sm text-gray-400 file:mr-4 file:rounded-xl file:border-0 file:bg-gray-800 file:px-4 file:py-2.5 file:text-white hover:file:bg-gray-700"
+            />
           </div>
 
           <div className="flex gap-4">

@@ -22,6 +22,8 @@ function ReportItem() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState("");
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -32,7 +34,14 @@ function ReportItem() {
     setError("");
     setSubmitting(true);
     try {
-      await addItem(form);
+      if (imageFile) {
+        const fd = new FormData();
+        Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+        fd.append("image", imageFile);
+        await addItem(fd);
+      } else {
+        await addItem(form);
+      }
       setSubmitted(true);
       setTimeout(() => navigate("/items"), 2000);
     } catch (err) {
@@ -225,6 +234,26 @@ function ReportItem() {
               required
               placeholder="Your phone number"
               className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none placeholder:text-gray-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Photo */}
+          <div className="mb-8">
+            <label className="mb-2 block text-sm font-medium text-gray-300">
+              Photo (optional)
+            </label>
+            {preview && (
+              <img src={preview} alt="Preview" className="mb-3 h-40 w-full rounded-xl object-cover" />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setImageFile(file);
+                setPreview(file ? URL.createObjectURL(file) : "");
+              }}
+              className="w-full text-sm text-gray-400 file:mr-4 file:rounded-xl file:border-0 file:bg-gray-800 file:px-4 file:py-2.5 file:text-white hover:file:bg-gray-700"
             />
           </div>
 

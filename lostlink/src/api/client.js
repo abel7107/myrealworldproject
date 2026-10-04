@@ -24,16 +24,24 @@ async function request(path, { method = "GET", body, params } = {}) {
     });
   }
 
-  const headers = { "Content-Type": "application/json" };
+  const headers = {};
   const token = getToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
+  let payload;
+  if (body instanceof FormData) {
+    payload = body; // browser sets multipart boundary
+  } else if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+    payload = JSON.stringify(body);
+  }
+
   const res = await fetch(url.pathname + url.search, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: payload,
   });
 
   const data = await res.json().catch(() => ({}));
@@ -60,9 +68,23 @@ export const api = {
   updateItem: (id, item) =>
     request(`/items/${id}`, { method: "PUT", body: item }),
   deleteItem: (id) => request(`/items/${id}`, { method: "DELETE" }),
+  setItemStatus: (id, status) =>
+    request(`/items/${id}/status`, { method: "PATCH", body: { status } }),
 
   reportItem: (id, payload) =>
     request(`/items/${id}/report`, { method: "POST", body: payload }),
+
+  // Messages
+  sendMessage: (receiverId, itemId, content) =>
+    request("/messages", { method: "POST", body: { receiverId, itemId, content } }),
+  getConversations: () => request("/messages/conversations"),
+  getConversation: (conversationId) =>
+    request(`/messages/conversations/${encodeURIComponent(conversationId)}`),
+  getUnreadCount: () => request("/messages/unread-count"),
+  markMessageAsRead: (id) => request(`/messages/${id}/read`, { method: "PATCH" }),
+  markConversationAsRead: (conversationId) =>
+    request(`/messages/conversations/${encodeURIComponent(conversationId)}/read`, { method: "PATCH" }),
+  deleteMessage: (id) => request(`/messages/${id}`, { method: "DELETE" }),
 
   // Users
   updateMe: (updates) => request("/users/me", { method: "PUT", body: updates }),

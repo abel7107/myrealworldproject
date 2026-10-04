@@ -7,7 +7,13 @@ import authRoutes from './routes/authRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
+import path from 'node:path';
+import fs from 'node:fs';
+
+const uploadsDir = path.join(process.cwd(), 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const app = express();
 
@@ -31,6 +37,9 @@ app.use('/api/', limiter);
 // Parse JSON bodies
 app.use(express.json());
 
+// Serve uploaded images
+app.use('/uploads', express.static(uploadsDir));
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'LostLink API is running' });
@@ -41,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/messages', messageRoutes);
 
 // 404 handler
 app.use(notFound);

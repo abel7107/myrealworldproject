@@ -68,12 +68,21 @@ export function ItemsProvider({ children }) {
     setItems((prev) => prev.filter((item) => String(item.id) !== String(id)));
   };
 
+  const setItemStatus = async (id, status) => {
+    const { data } = await api.setItemStatus(id, status);
+    const normalized = normalizeItem(data);
+    setItems((prev) =>
+      prev.map((item) => (String(item.id) === String(id) ? normalized : item))
+    );
+    return data;
+  };
+
   const getItem = async (id) => {
     const { data } = await api.getItem(id);
     return normalizeItem(data);
   };
 
-  const value = { items, loading, addItem, updateItem, deleteItem, getItem, refresh };
+  const value = { items, loading, addItem, updateItem, setItemStatus, deleteItem, getItem, refresh };
 
   return <ItemsContext.Provider value={value}>{children}</ItemsContext.Provider>;
 }

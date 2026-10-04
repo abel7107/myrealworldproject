@@ -7,14 +7,39 @@ import { api } from "../api/client";
 function ItemDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getItem } = useItems();
-  const { isAuthenticated } = useAuth();
+  const { getItem, setItemStatus } = useItems();
+  const { isAuthenticated, user } = useAuth();
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportForm, setReportForm] = useState({ reason: "", description: "" });
   const [reportMsg, setReportMsg] = useState("");
+  const [statusMsg, setStatusMsg] = useState("");
+  const handleToggleStatus = async () => {
+    setStatusMsg("");
+    try {
+      await setItemStatus(item.id, item.status === "RESOLVED" ? "ACTIVE" : "RESOLVED");
+      const updated = await getItem(id);
+      setItem(updated);
+      setStatusMsg(item.status === "RESOLVED" ? "Item reopened." : "Item marked as resolved. 🎉");
+    } catch (err) {
+      setStatusMsg(err.message || "Failed to update status.");
+    }
+  };
+
+  const contactOwner = async () => {
+    // Reuse an existing conversation if one already exists for this item + owner
+    try {
+      const { data } = await api.getConversations();
+      const existing = data.find(
+        (c) => c.item?.id === item.id && c.otherUser.id === item.ownerId
+      );
+      navigate(existing ? `/messages/${existing.conversationId}` : `/messages/${item.id}:${item.ownerId}`);
+    } catch {
+      navigate(`/messages/${item.id}:${item.ownerId}`);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -72,11 +97,15 @@ function ItemDetail() {
         </button>
 
         <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900">
-          {/* Image placeholder */}
+          {/* Image */}
           <div className="flex h-64 items-center justify-center bg-gray-800 md:h-96">
-            <span className="text-8xl">
-              {item.type === "Lost" ? "🔍" : "🤝"}
-            </span>
+            {item.imageUrl ? (
+              <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-8xl">
+                {item.type === "Lost" ? "🔍" : "🤝"}
+              </span>
+            )}
           </div>
 
           {/* Content */}
@@ -93,6 +122,20 @@ function ItemDetail() {
                 {item.type}
               </span>
             </div>
+
+            {item.status && item.status !== "ACTIVE" && (
+              <div className="mb-4">
+                <span
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+                    item.status === "RESOLVED"
+                      ? "bg-blue-500/10 text-blue-400"
+                      : "bg-yellow-500/10 text-yellow-400"
+                  }`}
+                >
+                  {item.status === "RESOLVED" ? "✅ Resolved" : item.status}
+                </span>
+              </div>
+            )}
 
             <div className="mb-6 grid gap-4 border-b border-gray-800 pb-6 md:grid-cols-2">
               <div>
@@ -130,6 +173,45 @@ function ItemDetail() {
                 <p className="mt-1 text-lg font-semibold text-white">
                   {item.contactPhone}
                 </p>
+              </div>
+            )}
+
+            {/* Owner: resolve / reopen */}
+            {isAuthenticated && item.ownerId === user?.id && (
+              <div className="mb-6">
+                <button
+                  onClick={handleToggleStatus}
+                  className={`rounded-xl px-6 py-3 font-semibold text-white transition ${
+                    item.status === "RESOLVED"
+                      ? "bg-yellow-600 hover:bg-yellow-700"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
+                >
+                  {item.status === "RESOLVED" ? "↩ Reopen this item" : "✅ Mark as Resolved"}
+                </button>
+                {statusMsg && <p className="mt-2 text-sm text-gray-400">{statusMsg}</p>}
+              </div>
+            )}
+
+            {/* Contact the item owner */}
+            {item.ownerId !== user?.id && (
+              <div className="mb-6">
+                {isAuthenticated ? (
+                  <button
+                    onClick={contactOwner}
+                    className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+                  >
+                    💬 Contact User
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="inline-block rounded-xl border border-blue-500/40 px-6 py-3 font-semibold text-blue-400 transition hover:bg-blue-500/10"
+                  >
+                    Log in to contact the owner
+                  </Link>
+                )}
+
               </div>
             )}
 

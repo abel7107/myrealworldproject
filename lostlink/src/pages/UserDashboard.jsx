@@ -5,7 +5,7 @@ import { useItems } from "../context/ItemsContext";
 
 function UserDashboard() {
   const { user, updateProfile } = useAuth();
-  const { items, deleteItem } = useItems();
+  const { items, deleteItem, setItemStatus } = useItems();
 
   const myItems = items.filter((i) => i.ownerId === user?.id);
   const lostCount = myItems.filter((i) => i.type === "Lost").length;
@@ -38,6 +38,15 @@ function UserDashboard() {
       await deleteItem(id);
     } catch (err) {
       setActionError(err.message || "Failed to delete item.");
+    }
+  };
+
+  const handleToggleStatus = async (item) => {
+    setActionError("");
+    try {
+      await setItemStatus(item.id, item.status === "RESOLVED" ? "ACTIVE" : "RESOLVED");
+    } catch (err) {
+      setActionError(err.message || "Failed to update item status.");
     }
   };
 
@@ -146,6 +155,16 @@ function UserDashboard() {
                     </div>
                   </Link>
                   <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => handleToggleStatus(item)}
+                      className={`text-sm ${
+                        item.status === "RESOLVED"
+                          ? "text-yellow-400 hover:text-yellow-300"
+                          : "text-green-400 hover:text-green-300"
+                      }`}
+                    >
+                      {item.status === "RESOLVED" ? "Reopen" : "Mark Resolved"}
+                    </button>
                     <Link
                       to={`/item/${item.id}/edit`}
                       className="text-sm text-blue-500 hover:text-blue-400"

@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import Profile from "./pages/Profile";
+import Messages from "./pages/Messages";
+import Conversation from "./pages/Conversation";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminItems from "./pages/AdminItems";
@@ -31,6 +33,15 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Protected user routes */}
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <Messages />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/messages/:conversationId" element={<ProtectedRoute><Conversation /></ProtectedRoute>} />
         <Route
           path="/dashboard"
           element={

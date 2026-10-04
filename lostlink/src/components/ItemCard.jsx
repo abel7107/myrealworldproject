@@ -1,13 +1,17 @@
 import { Link } from "react-router-dom";
 
-function ItemCard({ id, title, type, category, location, date }) {
+function ItemCard({ id, title, type, category, location, date, imageUrl }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 transition hover:border-gray-700">
-      {/* Image placeholder */}
+      {/* Image */}
       <div className="flex h-48 items-center justify-center bg-gray-800">
-        <span className="text-5xl">
-          {type === "Lost" ? "🔍" : "🤝"}
-        </span>
+        {imageUrl ? (
+          <img src={imageUrl} alt={title} className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-5xl">
+            {type === "Lost" ? "🔍" : "🤝"}
+          </span>
+        )}
       </div>
 
       {/* Content */}

@@ -74,6 +74,7 @@ export async function createItem(req, res, next) {
         contactPhone: contactPhone || null,
         ownerId: req.user.userId,
         categoryId: categoryRecord.id,
+        imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
       },
       include: itemInclude,
     });
@@ -108,6 +109,7 @@ export async function updateItem(req, res, next) {
       }
       data.categoryId = categoryRecord.id;
     }
+    if (req.file) data.imageUrl = `/uploads/${req.file.filename}`;
 
     const updated = await prisma.item.update({
       where: { id: item.id },
@@ -115,6 +117,31 @@ export async function updateItem(req, res, next) {
       include: itemInclude,
     });
     res.json({ success: true, message: 'Item updated', data: updated });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateItemStatus(req, res, next) {
+  try {
+    const item = await prisma.item.findUnique({ where: { id: Number(req.params.id) } });
+    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+    if (item.ownerId !== req.user.userId && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    const { status } = req.body;
+    const allowed = ['PENDING', 'ACTIVE', 'RESOLVED'];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ success: false, message: `Status must be one of: ${allowed.join(', ')}` });
+    }
+
+    const updated = await prisma.item.update({
+      where: { id: item.id },
+      data: { status },
+      include: itemInclude,
+    });
+    res.json({ success: true, message: `Item marked as ${status.toLowerCase()}`, data: updated });
   } catch (error) {
     next(error);
   }

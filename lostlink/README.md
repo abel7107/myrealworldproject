@@ -1,16 +1,89 @@
-# React + Vite
+# LostLink
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lost-and-found platform where users can report lost/found items, search the database, contact owners in-app, and resolve items once reunited. Admins can moderate users, items, and reports.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Frontend:** React 19, Vite, React Router 7, Tailwind CSS 4
+- **Backend:** Node.js, Express 5, Prisma ORM, SQLite, JWT auth, Multer (image uploads)
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Register / login with JWT auth, protected routes
+- Report lost & found items with category, location, date, contact info, and photo upload
+- Browse, search, and filter items
+- Item detail page with report (flag) and contact-owner actions
+- In-app messaging (conversations, unread counts, read tracking)
+- Mark items as resolved / reopen them
+- User dashboard: profile edit, report management (edit, delete, resolve)
+- Admin dashboard: stats, user suspend/activate, item status/delete, report resolve/dismiss
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+.
+├── src/                  # React frontend (pages, components, context, api client)
+├── server/
+│   ├── src/              # Express API (routes, controllers, middleware)
+│   ├── prisma/           # schema, seed, SQLite dev.db
+│   └── uploads/          # uploaded item images (gitignored)
+└── vite.config.js        # dev server + /api and /uploads proxy to :5000
+```
+
+## Getting Started
+
+### 1. Install dependencies
+
+```bash
+npm install
+cd server && npm install
+```
+
+### 2. Configure environment
+
+Create `server/.env`:
+
+```env
+PORT=5000
+JWT_SECRET=change-me
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:5173
+DATABASE_URL="file:./dev.db"
+```
+
+### 3. Set up the database
+
+```bash
+cd server
+npx prisma db push
+npm run db:seed
+```
+
+### 4. Run (two terminals)
+
+```bash
+# Terminal 1 — API
+cd server
+npm run dev        # http://localhost:5000
+
+# Terminal 2 — Frontend
+npm run dev        # http://localhost:5173
+```
+
+## Seeded Accounts
+
+| Role  | Email                | Password   |
+|-------|----------------------|------------|
+| Admin | `admin@lostlink.com` | `admin123` |
+| User  | `abebe@example.com`  | `user123`  |
+
+## Useful Scripts
+
+| Command             | Where    | Purpose                  |
+|---------------------|----------|--------------------------|
+| `npm run dev`       | root     | Vite dev server          |
+| `npm run build`     | root     | Production build         |
+| `npm run lint`      | root     | ESLint                   |
+| `npm run dev`       | server/  | API with `--watch`       |
+| `npm run db:push`   | server/  | Sync Prisma schema       |
+| `npm run db:seed`   | server/  | Seed categories/users    |

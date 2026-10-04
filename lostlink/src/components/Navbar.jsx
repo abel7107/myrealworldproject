@@ -1,10 +1,27 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../api/client";
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+    let cancelled = false;
+    const load = () =>
+      api.getUnreadCount()
+        .then(({ data }) => !cancelled && setUnread(data.unreadCount))
+        .catch(() => {});
+    load();
+    const interval = setInterval(load, 15000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [isAuthenticated, location.pathname]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -70,6 +87,19 @@ function Navbar() {
                 className="rounded-lg px-4 py-2 text-gray-300 transition hover:text-white"
               >
                 Profile
+              </Link>
+              <Link
+                to="/messages"
+                className={`relative rounded-lg px-4 py-2 transition hover:text-white ${
+                  isActive("/messages") ? "text-white" : "text-gray-300"
+                }`}
+              >
+                Messages
+                {unread > 0 && (
+                  <span className="ml-1.5 rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                    {unread}
+                  </span>
+                )}
               </Link>
               <button
                 onClick={handleLogout}
