@@ -24,6 +24,7 @@ model User {
   reports       Report[]
   sentMessages      Message[] @relation("SentMessages")
   receivedMessages   Message[] @relation("ReceivedMessages")
+  notifications     Notification[]
 }
 
 model Category {
@@ -65,6 +66,17 @@ model Report {
   item          Item        @relation(fields: [itemId], references: [id])
   createdAt     DateTime    @default(now())
   resolvedAt    DateTime?
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   @default("INFO") // MESSAGE, REPORT, INFO
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model Message {

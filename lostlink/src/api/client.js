@@ -90,6 +90,12 @@ export const api = {
     request(`/messages/conversations/${encodeURIComponent(conversationId)}/read`, { method: "PATCH" }),
   deleteMessage: (id) => request(`/messages/${id}`, { method: "DELETE" }),
 
+  // Notifications
+  getNotifications: () => request("/notifications"),
+  getNotificationUnreadCount: () => request("/notifications/unread-count"),
+  markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: "PATCH" }),
+  markAllNotificationsRead: () => request("/notifications/read-all", { method: "PATCH" }),
+
   // Users
   updateMe: (updates) => request("/users/me", { method: "PUT", body: updates }),
 

@@ -8,6 +8,7 @@ import itemRoutes from './routes/itemRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -51,6 +52,7 @@ app.use('/api/items', itemRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use(notFound);

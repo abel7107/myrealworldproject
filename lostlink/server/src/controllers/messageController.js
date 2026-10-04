@@ -42,6 +42,15 @@ export async function sendMessage(req, res, next) {
       include: { sender: { select: userSelect }, receiver: { select: userSelect }, item: { select: itemSelect } },
     });
 
+    await prisma.notification.create({
+      data: {
+        userId: receiver.id,
+        type: 'MESSAGE',
+        message: `${message.sender.name} sent you a message about "${item.title}"`,
+        link: `/messages/${item.id}:${senderId}`,
+      },
+    });
+
     res.status(201).json({ success: true, message: 'Message sent successfully', data: message });
   } catch (error) { next(error); }
 }

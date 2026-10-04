@@ -22,6 +22,17 @@ export async function createReport(req, res, next) {
         reporter: { select: { id: true, name: true, email: true } },
       },
     });
+    if (item.ownerId !== req.user.userId) {
+      await prisma.notification.create({
+        data: {
+          userId: item.ownerId,
+          type: 'REPORT',
+          message: `Your item "${item.title}" was reported (${reason})`,
+          link: `/item/${item.id}`,
+        },
+      });
+    }
+
     res.status(201).json({ success: true, message: 'Report submitted', data: report });
   } catch (error) {
     next(error);
