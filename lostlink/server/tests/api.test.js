@@ -151,6 +151,28 @@ test('messaging flow between users', async () => {
   assert.equal(read.status, 200);
 });
 
+test('matching items trigger notifications', async () => {
+  // Create a FOUND item as admin, then a LOST item in same category/location as abebe
+  const found = await api('POST', '/api/items', {
+    token: aliceToken,
+    body: { title: 'Found Wallet', type: 'Found', category: 'Other', location: 'MatchTown' },
+  });
+  assert.equal(found.status, 201);
+
+  const lost = await api('POST', '/api/items', {
+    token: bobToken,
+    body: { title: 'Lost Wallet', type: 'Lost', category: 'Other', location: 'MatchTown' },
+  });
+  assert.equal(lost.status, 201);
+
+  const adminNotifs = await api('GET', '/api/notifications/unread-count', { token: aliceToken });
+  assert.ok(adminNotifs.data.data.unreadCount >= 1);
+
+  // cleanup
+  await api('DELETE', `/api/items/${found.data.data.id}`, { token: aliceToken });
+  await api('DELETE', `/api/items/${lost.data.data.id}`, { token: bobToken });
+});
+
 test('delete item cleans up', async () => {
   const del = await api('DELETE', `/api/items/${itemId}`, { token: bobToken });
   assert.equal(del.status, 200);

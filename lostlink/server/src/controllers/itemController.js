@@ -79,6 +79,39 @@ export async function createItem(req, res, next) {
       include: itemInclude,
     });
 
+    // Find likely matches: opposite type, same category, same/similar location,
+    // still active, and not owned by the same user.
+    const oppositeType = newItem.type === 'LOST' ? 'FOUND' : 'LOST';
+    const candidates = await prisma.item.findMany({
+      where: {
+        type: oppositeType,
+        status: { notIn: ['REMOVED', 'RESOLVED'] },
+        categoryId: newItem.categoryId,
+        ownerId: { not: newItem.ownerId },
+        OR: [{ location: newItem.location }, { location: { contains: newItem.location } }],
+      },
+      take: 3,
+    });
+
+    for (const match of candidates) {
+      await prisma.notification.create({
+        data: {
+          userId: newItem.ownerId,
+          type: 'INFO',
+          message: `Possible match: "${match.title}" (${match.type.toLowerCase()}) at ${match.location} may be your item`,
+          link: `/item/${match.id}`,
+        },
+      });
+      await prisma.notification.create({
+        data: {
+          userId: match.ownerId,
+          type: 'INFO',
+          message: `A new ${newItem.type.toLowerCase()} item "${newItem.title}" at ${newItem.location} may match your "${match.title}"`,
+          link: `/item/${newItem.id}`,
+        },
+      });
+    }
+
     res.status(201).json({ success: true, message: 'Item created', data: newItem });
   } catch (error) {
     next(error);

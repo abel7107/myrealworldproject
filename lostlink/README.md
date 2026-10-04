@@ -14,6 +14,7 @@ A lost-and-found platform where users can report lost/found items, search the da
 - Browse, search, and filter items
 - Item detail page with report (flag) and contact-owner actions
 - In-app messaging (conversations, unread counts, read tracking)
+- Automatic lost↔found match alerts when a new item matches the category/location of an existing one
 - Mark items as resolved / reopen them
 - User dashboard: profile edit, report management (edit, delete, resolve)
 - Admin dashboard: stats, user suspend/activate, item status/delete, report resolve/dismiss
