@@ -130,7 +130,6 @@ test('non-owner cannot change status', async () => {
 
 test('messaging flow between users', async () => {
   // abebe (owner of itemId) gets a message from... use admin as the sender
-  const me = await api('GET', '/api/auth/me', { token: aliceToken });
   const ownerRes = await api('GET', `/api/items/${itemId}`);
   const ownerId = ownerRes.data.data.ownerId;
 

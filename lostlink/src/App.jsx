@@ -7,6 +7,8 @@ import ReportItem from "./pages/ReportItem";
 import ItemDetail from "./pages/ItemDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import UserDashboard from "./pages/UserDashboard";
 import Profile from "./pages/Profile";
 import Messages from "./pages/Messages";
@@ -31,6 +33,8 @@ function App() {
         <Route path="/report" element={<ProtectedRoute><ReportItem /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected user routes */}
         <Route

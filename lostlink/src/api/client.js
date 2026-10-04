@@ -60,6 +60,10 @@ export const api = {
   register: (name, email, password) =>
     request("/auth/register", { method: "POST", body: { name, email, password } }),
   getMe: () => request("/auth/me"),
+  forgotPassword: (email) =>
+    request("/auth/forgot-password", { method: "POST", body: { email } }),
+  resetPassword: (token, password) =>
+    request("/auth/reset-password", { method: "POST", body: { token, password } }),
 
   // Items
   getItems: (params) => request("/items", { params }),
