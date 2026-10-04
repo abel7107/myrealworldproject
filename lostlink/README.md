@@ -77,6 +77,21 @@ npm run dev        # http://localhost:5173
 | Admin | `admin@lostlink.com` | `admin123` |
 | User  | `abebe@example.com`  | `user123`  |
 
+## Production
+
+```bash
+npm run build          # build the frontend into dist/
+cd server
+NODE_ENV=production npm start   # API + built frontend on :5000
+```
+
+In production mode Express serves `dist/` directly, handles client-side
+routes, and the API is available at `/api` on the same port. There's a ready
+`server/.env.example` — copy it to `server/.env` and set a real `JWT_SECRET`.
+
+> Note: SQLite is fine for development/demo. For real multi-user deployment,
+> switch `DATABASE_URL` in `server/prisma/schema.prisma` to PostgreSQL.
+
 ## Useful Scripts
 
 | Command             | Where    | Purpose                  |

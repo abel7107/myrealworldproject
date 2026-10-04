@@ -54,6 +54,16 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// In production, serve the built frontend from Express and let React
+// Router handle client-side routes.
+if (config.nodeEnv === 'production') {
+  const distDir = path.join(process.cwd(), '..', 'dist');
+  app.use(express.static(distDir));
+  app.get(/^(?!\/api|\/uploads).*/, (req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'));
+  });
+}
+
 // 404 handler
 app.use(notFound);
 
