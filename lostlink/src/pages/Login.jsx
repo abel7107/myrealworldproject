@@ -22,9 +22,9 @@ function Login() {
     try {
       const user = await login(form.email, form.password);
       if (user.role === "ADMIN") {
-        navigate("/admin");
+        navigate("/admin", { state: { greeting: "welcomeBack" } });
       } else {
-        navigate("/dashboard");
+        navigate("/dashboard", { state: { greeting: "welcomeBack" } });
       }
     } catch (err) {
       setError(err.message);

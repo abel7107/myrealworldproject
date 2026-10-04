@@ -36,7 +36,7 @@ function Register() {
     setLoading(true);
     try {
       await register(form.name, form.email, form.password);
-      navigate("/dashboard");
+      navigate("/dashboard", { state: { greeting: "welcome" } });
     } catch (err) {
       setError(err.message);
     } finally {

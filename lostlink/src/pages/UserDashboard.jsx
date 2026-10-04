@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useItems } from "../context/ItemsContext";
 
 function UserDashboard() {
   const { user, updateProfile } = useAuth();
   const { items, deleteItem, setItemStatus } = useItems();
+  const location = useLocation();
+  const isNewUser = location.state?.greeting === "welcome";
 
   const myItems = items.filter((i) => i.ownerId === user?.id);
   const lostCount = myItems.filter((i) => i.type === "Lost").length;
@@ -57,7 +59,7 @@ function UserDashboard() {
         <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h1 className="text-3xl font-bold text-white">
-              Welcome back, {user?.name?.split(" ")[0]}
+              {isNewUser ? "Welcome," : "Welcome back,"} {user?.name?.split(" ")[0]}
             </h1>
             <p className="mt-1 text-gray-400">Manage your lost & found reports</p>
           </div>
