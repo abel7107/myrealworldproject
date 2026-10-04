@@ -19,6 +19,7 @@ import AdminItems from "./pages/AdminItems";
 import AdminReports from "./pages/AdminReports";
 import EditItem from "./pages/EditItem";
 import NotFound from "./pages/NotFound";
+import MapView from "./pages/MapView";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/items" element={<BrowseItems />} />
+        <Route path="/map" element={<MapView />} />
         <Route path="/item/:id" element={<ItemDetail />} />
         <Route path="/item/:id/edit" element={<ProtectedRoute><EditItem /></ProtectedRoute>} />
         <Route path="/report" element={<ProtectedRoute><ReportItem /></ProtectedRoute>} />

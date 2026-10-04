@@ -94,6 +94,14 @@ function Navbar() {
             Browse Items
           </Link>
           <Link
+            to="/map"
+            className={`transition ${
+              isActive("/map") ? "text-white" : "text-gray-300 hover:text-white"
+            }`}
+          >
+            Map
+          </Link>
+          <Link
             to="/report"
             className={`transition ${
               isActive("/report")
