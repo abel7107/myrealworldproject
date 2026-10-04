@@ -25,6 +25,7 @@ model User {
   sentMessages      Message[] @relation("SentMessages")
   receivedMessages   Message[] @relation("ReceivedMessages")
   notifications     Notification[]
+  claims            Claim[]
 }
 
 model Category {
@@ -53,6 +54,7 @@ model Item {
 
   reports       Report[]
   messages      Message[]
+  claims        Claim[]
 }
 
 model Report {
@@ -66,6 +68,17 @@ model Report {
   item          Item        @relation(fields: [itemId], references: [id])
   createdAt     DateTime    @default(now())
   resolvedAt    DateTime?
+}
+
+model Claim {
+  id         Int      @id @default(autoincrement())
+  itemId     Int
+  item       Item     @relation(fields: [itemId], references: [id])
+  claimantId Int
+  claimant   User     @relation(fields: [claimantId], references: [id])
+  message    String
+  status     String   @default("PENDING") // PENDING, ACCEPTED, DECLINED
+  createdAt  DateTime @default(now())
 }
 
 model Notification {

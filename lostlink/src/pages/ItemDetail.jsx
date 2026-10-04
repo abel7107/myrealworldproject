@@ -16,6 +16,45 @@ function ItemDetail() {
   const [reportForm, setReportForm] = useState({ reason: "", description: "" });
   const [reportMsg, setReportMsg] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [claimOpen, setClaimOpen] = useState(false);
+  const [claimMsg, setClaimMsg] = useState("");
+  const [claimResult, setClaimResult] = useState("");
+  const [claims, setClaims] = useState(null);
+
+  const isOwner = isAuthenticated && item?.ownerId === user?.id;
+
+  useEffect(() => {
+    if (isOwner && item?.id) {
+      api.getClaims(item.id).then(({ data }) => setClaims(data)).catch(() => setClaims([]));
+    }
+  }, [isOwner, item?.id]);
+
+  const handleClaim = async (e) => {
+    e.preventDefault();
+    setClaimResult("");
+    try {
+      await api.createClaim(item.id, { message: claimMsg });
+      setClaimResult("Claim submitted! The owner has been notified.");
+      setClaimOpen(false);
+      setClaimMsg("");
+    } catch (err) {
+      setClaimResult(err.message || "Failed to submit claim.");
+    }
+  };
+
+  const handleClaimAction = async (claimId, status) => {
+    try {
+      await api.updateClaimStatus(claimId, status);
+      setClaims((prev) => prev.map((c) => (c.id === claimId ? { ...c, status } : c)));
+      if (status === "ACCEPTED") {
+        const updated = await getItem(id);
+        setItem(updated);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleToggleStatus = async () => {
     setStatusMsg("");
     try {
@@ -173,6 +212,59 @@ function ItemDetail() {
                 <p className="mt-1 text-lg font-semibold text-white">
                   {item.contactPhone}
                 </p>
+              </div>
+            )}
+
+            {/* Claim a found item */}
+            {isAuthenticated && item.type === "Found" && item.ownerId !== user?.id && item.status !== "RESOLVED" && (
+              <div className="mb-6">
+                <button
+                  onClick={() => setClaimOpen((v) => !v)}
+                  className="rounded-xl bg-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700"
+                >
+                  ✋ This is mine — Claim it
+                </button>
+                {claimResult && <p className="mt-2 text-sm text-gray-400">{claimResult}</p>}
+                {claimOpen && (
+                  <form onSubmit={handleClaim} className="mt-4 grid gap-4 rounded-xl border border-gray-800 bg-gray-900 p-4">
+                    <textarea
+                      rows={3}
+                      required
+                      placeholder="Describe the item to prove it's yours (e.g., unique marks, contents)..."
+                      value={claimMsg}
+                      onChange={(e) => setClaimMsg(e.target.value)}
+                      className="resize-none rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
+                    />
+                    <button className="rounded-xl bg-purple-600 px-6 py-3 font-semibold text-white transition hover:bg-purple-700">
+                      Submit Claim
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {/* Owner: manage claims */}
+            {isOwner && claims && claims.length > 0 && (
+              <div className="mb-6 rounded-xl border border-gray-800 bg-gray-900 p-4">
+                <h3 className="mb-3 font-semibold text-white">Claim requests</h3>
+                {claims.map((c) => (
+                  <div key={c.id} className="mb-3 rounded-lg border border-gray-800 bg-gray-950 p-3 last:mb-0">
+                    <p className="text-sm text-gray-300">
+                      <span className="font-medium text-white">{c.claimant?.name}</span>: {c.message}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">Status: {c.status}</p>
+                    {c.status === "PENDING" && (
+                      <div className="mt-2 flex gap-3">
+                        <button onClick={() => handleClaimAction(c.id, "ACCEPTED")} className="text-sm text-green-400 hover:text-green-300">
+                          Accept (resolves item)
+                        </button>
+                        <button onClick={() => handleClaimAction(c.id, "DECLINED")} className="text-sm text-red-400 hover:text-red-300">
+                          Decline
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
 

@@ -96,6 +96,11 @@ export const api = {
   markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: "PATCH" }),
   markAllNotificationsRead: () => request("/notifications/read-all", { method: "PATCH" }),
 
+  // Claims
+  createClaim: (id, payload) => request(`/items/${id}/claims`, { method: "POST", body: payload }),
+  getClaims: (id) => request(`/items/${id}/claims`),
+  updateClaimStatus: (id, status) => request(`/claims/${id}/status`, { method: "PATCH", body: { status } }),
+
   // Users
   updateMe: (updates) => request("/users/me", { method: "PUT", body: updates }),
 

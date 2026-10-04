@@ -190,6 +190,7 @@ export async function deleteItem(req, res, next) {
     await prisma.$transaction([
       prisma.report.deleteMany({ where: { itemId: item.id } }),
       prisma.message.deleteMany({ where: { itemId: item.id } }),
+      prisma.claim.deleteMany({ where: { itemId: item.id } }),
       prisma.item.delete({ where: { id: item.id } }),
     ]);
     res.json({ success: true, message: 'Item deleted' });
