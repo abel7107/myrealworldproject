@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useItems } from "../context/ItemsContext";
+import { api } from "../api/client";
 
 function Profile() {
   const { user, updateProfile } = useAuth();
@@ -16,6 +17,18 @@ function Profile() {
   const [saving, setSaving] = useState(false);
 
   const myItems = items.filter((i) => i.ownerId === user?.id);
+
+  const [watchlist, setWatchlist] = useState([]);
+  useEffect(() => {
+    api.getFavorites().then(({ data }) => setWatchlist(data)).catch(() => {});
+  }, []);
+
+  const removeFromWatchlist = async (id) => {
+    try {
+      await api.toggleFavorite(id);
+      setWatchlist((prev) => prev.filter((i) => i.id !== id));
+    } catch { /* ignore */ }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -108,6 +121,35 @@ function Profile() {
         <Link to="/dashboard" className="mt-6 inline-block text-blue-500 hover:text-blue-400">
           ← Back to Dashboard
         </Link>
+
+        {/* Watchlist */}
+        <div className="mt-10">
+          <h2 className="mb-4 text-xl font-bold text-white">❤️ My Watchlist</h2>
+          {watchlist.length > 0 ? (
+            <div className="grid gap-4">
+              {watchlist.map((item) => (
+                <div key={item.id} className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-900 p-4">
+                  <Link to={`/item/${item.id}`} className="flex items-center gap-4">
+                    <span className="text-2xl">{item.type === "LOST" ? "🔍" : "🤝"}</span>
+                    <div>
+                      <p className="font-medium text-white">{item.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {item.location} · {item.status}
+                      </p>
+                    </div>
+                  </Link>
+                  <button onClick={() => removeFromWatchlist(item.id)} className="text-sm text-red-400 hover:text-red-300">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-xl border border-gray-800 bg-gray-900 py-8 text-center text-gray-500">
+              No saved items yet. Tap 🤍 on any item to watch it.
+            </p>
+          )}
+        </div>
       </div>
     </section>
   );

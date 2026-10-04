@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../api/client";
 
 function ItemCard({ id, title, type, category, location, date, imageUrl }) {
+  const [saved, setSaved] = useState(false);
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 transition hover:border-gray-700">
       {/* Image */}
-      <div className="flex h-48 items-center justify-center bg-gray-800">
+      <div className="relative flex h-48 items-center justify-center bg-gray-800">
         {imageUrl ? (
           <img src={imageUrl} alt={title} className="h-full w-full object-cover" />
         ) : (
@@ -12,6 +15,16 @@ function ItemCard({ id, title, type, category, location, date, imageUrl }) {
             {type === "Lost" ? "🔍" : "🤝"}
           </span>
         )}
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            try { await api.toggleFavorite(id); setSaved((v) => !v); } catch { /* not logged in */ }
+          }}
+          className="absolute right-3 top-3 rounded-full bg-gray-900/70 px-2 py-1 text-lg backdrop-blur transition hover:scale-110"
+          title="Save to watchlist"
+        >
+          {saved ? "❤️" : "🤍"}
+        </button>
       </div>
 
       {/* Content */}

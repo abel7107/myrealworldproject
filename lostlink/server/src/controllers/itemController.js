@@ -174,6 +174,24 @@ export async function updateItemStatus(req, res, next) {
       data: { status },
       include: itemInclude,
     });
+
+    // Let users watching this item know when it gets resolved
+    if (status === 'RESOLVED') {
+      const watchers = await prisma.favorite.findMany({ where: { itemId: item.id } });
+      for (const w of watchers) {
+        if (w.userId !== req.user.userId) {
+          await prisma.notification.create({
+            data: {
+              userId: w.userId,
+              type: 'INFO',
+              message: `"${item.title}" you were watching has been marked as resolved`,
+              link: `/item/${item.id}`,
+            },
+          });
+        }
+      }
+    }
+
     res.json({ success: true, message: `Item marked as ${status.toLowerCase()}`, data: updated });
   } catch (error) {
     next(error);
@@ -191,6 +209,7 @@ export async function deleteItem(req, res, next) {
       prisma.report.deleteMany({ where: { itemId: item.id } }),
       prisma.message.deleteMany({ where: { itemId: item.id } }),
       prisma.claim.deleteMany({ where: { itemId: item.id } }),
+      prisma.favorite.deleteMany({ where: { itemId: item.id } }),
       prisma.item.delete({ where: { id: item.id } }),
     ]);
     res.json({ success: true, message: 'Item deleted' });

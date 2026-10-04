@@ -10,7 +10,9 @@ import adminRoutes from './routes/adminRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import claimRoutes from './routes/claimRoutes.js';
+import { getFavorites } from './controllers/favoriteController.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
+import { authenticateUser } from './middleware/authMiddleware.js';
 import path from 'node:path';
 import fs from 'node:fs';
 
@@ -55,6 +57,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/claims', claimRoutes);
+app.get('/api/favorites', authenticateUser, getFavorites);
 
 // In production, serve the built frontend from Express and let React
 // Router handle client-side routes.

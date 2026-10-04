@@ -101,6 +101,11 @@ export const api = {
   getClaims: (id) => request(`/items/${id}/claims`),
   updateClaimStatus: (id, status) => request(`/claims/${id}/status`, { method: "PATCH", body: { status } }),
 
+  // Favorites
+  toggleFavorite: (id) => request(`/items/${id}/favorite`, { method: "POST" }),
+  isFavorited: (id) => request(`/items/${id}/favorite`),
+  getFavorites: () => request("/favorites"),
+
   // Users
   updateMe: (updates) => request("/users/me", { method: "PUT", body: updates }),
 
