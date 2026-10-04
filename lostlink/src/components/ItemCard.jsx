@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 
-function ItemCard({ id, title, type, category, location, date, imageUrl }) {
+function ItemCard({ id, title, type, category, location, date, imageUrl, status }) {
   const [saved, setSaved] = useState(false);
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 transition hover:border-gray-700">
@@ -31,15 +31,20 @@ function ItemCard({ id, title, type, category, location, date, imageUrl }) {
       <div className="p-5">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-xl font-semibold text-white">{title}</h3>
-          <span
-            className={`rounded-full px-3 py-1 text-sm ${
-              type === "Lost"
-                ? "bg-red-500/10 text-red-400"
-                : "bg-green-500/10 text-green-400"
-            }`}
-          >
-            {type}
-          </span>
+          <div className="flex gap-2">
+            {status === "RESOLVED" && (
+              <span className="rounded-full bg-blue-500/10 px-3 py-1 text-sm text-blue-400">Resolved</span>
+            )}
+            <span
+              className={`rounded-full px-3 py-1 text-sm ${
+                type === "Lost"
+                  ? "bg-red-500/10 text-red-400"
+                  : "bg-green-500/10 text-green-400"
+              }`}
+            >
+              {type}
+            </span>
+          </div>
         </div>
 
         <p className="text-sm text-gray-400">📍 {location}</p>

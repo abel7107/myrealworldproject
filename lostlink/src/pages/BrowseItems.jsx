@@ -9,6 +9,7 @@ function BrowseItems() {
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const [filterType, setFilterType] = useState("all");
   const [filterLocation, setFilterLocation] = useState("all");
+  const [showResolved, setShowResolved] = useState(false);
 
   const locations = useMemo(
     () => [...new Set(items.map((item) => item.location))],
@@ -24,9 +25,10 @@ function BrowseItems() {
         filterType === "all" || item.type.toLowerCase() === filterType;
       const matchesLocation =
         filterLocation === "all" || item.location === filterLocation;
-      return matchesSearch && matchesType && matchesLocation;
+      const matchesStatus = showResolved || item.status !== "RESOLVED";
+      return matchesSearch && matchesType && matchesLocation && matchesStatus;
     });
-  }, [items, search, filterType, filterLocation]);
+  }, [items, search, filterType, filterLocation, showResolved]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -96,9 +98,20 @@ function BrowseItems() {
         </div>
 
         {/* Results count */}
-        <p className="mb-6 text-sm text-gray-500">
-          Showing {filteredItems.length} of {items.length} items
-        </p>
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Showing {filteredItems.length} of {items.length} items
+          </p>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-400">
+            <input
+              type="checkbox"
+              checked={showResolved}
+              onChange={(e) => setShowResolved(e.target.checked)}
+              className="h-4 w-4 accent-blue-600"
+            />
+            Show resolved items
+          </label>
+        </div>
 
         {/* Items Grid */}
         {filteredItems.length > 0 ? (
