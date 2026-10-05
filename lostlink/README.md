@@ -10,6 +10,7 @@ A lost-and-found platform where users can report lost/found items, search the da
 ## Features
 
 - Register / login with JWT auth, protected routes
+- Forgot/reset password via email (console fallback in dev)
 - Report lost & found items with category, location, date, contact info, and photo upload
 - Browse, search, and filter items
 - Item detail page with report (flag) and contact-owner actions
@@ -52,6 +53,18 @@ JWT_SECRET=change-me
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173
 DATABASE_URL="file:./dev.db"
+```
+
+Password-reset emails work without extra config in development — they're
+printed to the server console. To send real emails, add SMTP settings:
+
+```env
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_SECURE=false
+MAIL_USER=you@example.com
+MAIL_PASS=your-app-password
+MAIL_FROM="LostLink <you@example.com>"
 ```
 
 ### 3. Set up the database
@@ -105,3 +118,4 @@ routes, and the API is available at `/api` on the same port. There's a ready
 | `npm run dev`       | server/  | API with `--watch`       |
 | `npm run db:push`   | server/  | Sync Prisma schema       |
 | `npm run db:seed`   | server/  | Seed categories/users    |
+| `npm test`          | server/  | Run API tests            |
