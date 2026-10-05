@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 server/uploads
+server/.env
+server/prisma/dev.db
 
 # Editor directories and files
 .vscode/*
