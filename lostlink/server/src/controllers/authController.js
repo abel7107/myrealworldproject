@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { config } from '../config/env.js';
 import prisma from '../config/database.js';
+import { sendMail } from '../utils/mailer.js';
 
 const publicUser = (user) => ({
   id: user.id,
@@ -135,11 +136,18 @@ export async function forgotPassword(req, res, next) {
       },
     });
 
-    // TODO: send token via email. For now it's returned in the response (dev only).
+    const resetLink = `${config.clientUrl}/reset-password?token=${token}`;
+    await sendMail({
+      to: user.email,
+      subject: 'Reset your LostLink password',
+      text: `Hi ${user.name},\n\nUse this link within 1 hour to reset your password:\n${resetLink}\n\nIf you didn't request this, you can ignore this email.`,
+    });
+
     res.json({
       success: true,
       message: 'If that email is registered, a reset link has been sent.',
-      devToken: token,
+      // Dev convenience only — never expose the token in production
+      ...(config.nodeEnv !== 'production' && { devToken: token }),
     });
   } catch (error) {
     next(error);
